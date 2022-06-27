@@ -1,5 +1,4 @@
 #pragma once
-#include "common.hpp"
 #include "log.hpp"
 class Socket
 {
@@ -26,6 +25,8 @@ public:
         local.sin_family = AF_INET;
         local.sin_port = htons(port);
         local.sin_addr.s_addr = INADDR_ANY;
+        int opt = 128;
+        setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
         if (bind(fd, (sockaddr *)&local, sizeof(local)) < 0)
         {
             LOG(FATAL, "socket bind error");
