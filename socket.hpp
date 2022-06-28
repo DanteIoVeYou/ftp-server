@@ -41,4 +41,12 @@ public:
             exit(SOCK_LISTEN);
         }
     }
+    static int Accept(int fd)
+    {
+        sockaddr_in peer;
+        socklen_t len = sizeof(peer);
+        bzero(&peer, len);
+        int ret = accept(fd, (sockaddr*)&peer, &len);
+        return ret;
+    }
 };
