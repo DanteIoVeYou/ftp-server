@@ -1,7 +1,8 @@
 CC=g++
-FLAG=-std=c++11
+FLAG=-std=c++17
+CRYPT=hash-library/md5.cpp
 server:unittest.cpp
-	$(CC) -o $@ $^ $(FLAG)
+	$(CC) -o $@ $^ $(CRYPT) $(FLAG)
 .PHONY:clean
 clean:
 	rm -rf server

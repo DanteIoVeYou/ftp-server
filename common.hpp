@@ -1,4 +1,5 @@
 #include <iostream>
+#include <filesystem>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -10,6 +11,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <pthread.h>
 enum Execpt
 {
     SOCK_CREATE,
