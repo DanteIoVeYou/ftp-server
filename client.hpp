@@ -1,7 +1,7 @@
 #pragma once
 
 #include "socket.hpp"
-
+static const std::string client_cmd_prompt = "cli:> ";
 class Client
 {
 public:
@@ -18,6 +18,8 @@ public:
         // SendAccount();
         while (true)
         {
+            std::cout << "client_cmd_prompt";
+            fflush(stdout);
             char buffer_cmd[1024];
             ssize_t size = read(0, buffer_cmd, sizeof(buffer_cmd) - 1);
             if (size < 0)

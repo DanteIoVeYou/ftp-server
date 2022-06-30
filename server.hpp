@@ -3,6 +3,11 @@
 #include "utils.hpp"
 static const std::string SERVER_VERSION = "FTP-v0.1-copyright@abc-running on GNU Linux";
 static const std::string ROOTDIR = "./root/";
+static const int BUFFER_SIZE = 1024;
+// enum buffer
+// {
+//     BUFFER_SIZE = 1024
+// };
 /*
  * 1.
  * Method: ls\r\n
@@ -15,7 +20,7 @@ static const std::string ROOTDIR = "./root/";
  * Method: put\r\n
  * Filename: xxx\r\n
  * \r\n
- *
+ * file content
  */
 class Server
 {
@@ -44,37 +49,35 @@ public:
                 Utils::CutString(method_line, &method, &cmd, ":");
                 if (cmd == "ls")
                 {
-                    Cmd_ls(fd, cmd);
+                    Cmd_ls(fd);
                 }
                 else if (cmd == "pwd")
                 {
-                    Cmd_pwd();
+                    Cmd_pwd(fd);
                 }
                 else if (cmd == "put")
                 {
-                    Cmd_put();
+                    Cmd_put(fd);
                 }
                 else if (cmd == "get")
                 {
-                    Cmd_get(fd, cmd);
+                    Cmd_get(fd);
                 }
                 else if (cmd == "quit")
                 {
-                    Cmd_quit();
+                    Cmd_quit(fd);
                     break;
                 }
                 else
                 {
-                    Cmd_others();
+                    Cmd_others(fd);
                 }
             }
         }
         close(fd);
     }
-
-    static bool Cmd_ls(int fd, const std::string &cmd)
+    static void Cmd_ls(int fd)
     {
-        // std::vector<std::string> file_list;
         std::string server_info;
         std::filesystem::directory_iterator fns(ROOTDIR.c_str());
         for (const auto &fn : fns)
@@ -86,26 +89,70 @@ public:
         if (send(fd, server_info.c_str(), server_info.size(), 0) < 0)
         {
             // Error
-            return false;
+            return;
         }
-        return true;
     }
-
-    static bool Cmd_pwd()
+    static bool Cmd_pwd(int fd)
     {
         // TODO
     }
-    static bool Cmd_put()
+    static bool Cmd_put(int fd)
+    {
+        std::unordered_map<std::string, std::string> packet_map;
+        while (true)
+        {
+            std::string line;
+            Utils::Readline(fd, &line);
+            if (line == "\r\n")
+            {
+                break;
+            }
+            std::string key;
+            std::string value;
+            Utils::CutString(line, &key, &value, ":");
+            packet_map[key] = value;
+        }
+        std::string filepath = ROOTDIR + packet_map["filename"];
+        int localfile_fd = open(filepath.c_str(), O_CREAT | O_WRONLY);
+        char buffer[BUFFER_SIZE] = {0};
+        int size = 0;
+        while (size = recv(fd, buffer, BUFFER_SIZE - 1, 0) > 0)
+        {
+            buffer[size] = 0;
+            write(localfile_fd, buffer, size);
+        }
+        close(localfile_fd);
+    }
+    static void Cmd_get(int fd)
+    {
+        std::unordered_map<std::string, std::string> packet_map;
+        while (true)
+        {
+            std::string line;
+            Utils::Readline(fd, &line);
+            if (line == "\r\n")
+            {
+                break;
+            }
+            std::string key;
+            std::string value;
+            Utils::CutString(line, &key, &value, ":");
+            packet_map[key] = value;
+        }
+        std::string filepath = ROOTDIR + packet_map["filename"];
+        int localfile_fd = open(filepath.c_str(), O_RDONLY);
+        struct stat st;
+        fstat(localfile_fd, &st);
+        if (sendfile(localfile_fd, fd, nullptr, st.st_size) < 0)
+        {
+            LOG(ERROR, "sendfile error");
+        }
+        close(localfile_fd);
+    }
+    static bool Cmd_quit(int fd)
     {
     }
-    static bool Cmd_get(int fd, const std::string &cmd)
-    {
-        int save_fd = open()
-    }
-    static bool Cmd_quit()
-    {
-    }
-    static bool cmd_others()
+    static bool Cmd_others(int fd)
     {
     }
     void Init()

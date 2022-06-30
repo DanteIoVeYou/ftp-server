@@ -9,9 +9,12 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/sendfile.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <pthread.h>
+#include <fcntl.h>
 enum Sock_Execpt
 {
     SOCK_CREATE,
@@ -34,5 +37,3 @@ public:
         return ret;
     }
 };
-
-
