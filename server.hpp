@@ -1,8 +1,22 @@
 #pragma once
 #include "socket.hpp"
-
+#include "utils.hpp"
 static const std::string SERVER_VERSION = "FTP-v0.1-copyright@abc-running on GNU Linux";
 static const std::string ROOTDIR = "./root/";
+/*
+ * 1.
+ * Method: ls\r\n
+ * \r\n
+ * 2.
+ * Method: getr\\n
+ * Filename: xxx
+ * \r\n
+ * 3.
+ * Method: put\r\n
+ * Filename: xxx\r\n
+ * \r\n
+ *
+ */
 class Server
 {
 public:
@@ -17,70 +31,81 @@ public:
         int fd = *(int *)(args);
         while (true)
         {
-            char buffer[1024];
-            ssize_t cmd_size = recv(fd, buffer, sizeof(buffer) - 1, 0);
-            if (cmd_size < 0)
+            std::string method_line;
+            Utils::Readline(fd, &method_line);
+            if (method_line.size() == 0)
             {
             }
             else
             {
-                buffer[cmd_size] = 0;
-                std::string cmd = buffer;
-                LOG(DEBUG, cmd);
-
+                LOG(DEBUG, method_line);
+                std::string method;
+                std::string cmd;
+                Utils::CutString(method_line, &method, &cmd, ":");
                 if (cmd == "ls")
                 {
-                    Ls();
+                    Cmd_ls(fd, cmd);
                 }
                 else if (cmd == "pwd")
                 {
-                    Pwd();
+                    Cmd_pwd();
                 }
                 else if (cmd == "put")
                 {
-                    Put();
+                    Cmd_put();
                 }
                 else if (cmd == "get")
                 {
-                    Get();
+                    Cmd_get(fd, cmd);
                 }
                 else if (cmd == "quit")
                 {
-                    Quit();
+                    Cmd_quit();
                     break;
                 }
                 else
                 {
-                    Others();
+                    Cmd_others();
                 }
             }
         }
         close(fd);
     }
-    static bool Ls()
+
+    static bool Cmd_ls(int fd, const std::string &cmd)
     {
         // std::vector<std::string> file_list;
+        std::string server_info;
         std::filesystem::directory_iterator fns(ROOTDIR.c_str());
         for (const auto &fn : fns)
         {
             std::string filename(fn.path().c_str());
             // file_list.push_back(filename.substr(ROOTDIR.size()));
-            std::cout << filename.substr(ROOTDIR.size()) << std::endl;
+            server_info += (filename.substr(ROOTDIR.size()) + "\r\n");
         }
+        if (send(fd, server_info.c_str(), server_info.size(), 0) < 0)
+        {
+            // Error
+            return false;
+        }
+        return true;
     }
-    static bool Pwd()
+
+    static bool Cmd_pwd()
+    {
+        // TODO
+    }
+    static bool Cmd_put()
     {
     }
-    static bool Put()
+    static bool Cmd_get(int fd, const std::string &cmd)
+    {
+        int save_fd = open()
+    }
+    static bool Cmd_quit()
     {
     }
-    static bool Get()
-    {
-    }
-    static bool Quit()
-    {
-    }
-    static bool Others()
+    static bool cmd_others()
     {
     }
     void Init()

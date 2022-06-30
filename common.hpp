@@ -12,11 +12,12 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <pthread.h>
-enum Execpt
+enum Sock_Execpt
 {
     SOCK_CREATE,
     SOCK_BIND,
-    SOCK_LISTEN
+    SOCK_LISTEN,
+    SOCK_CONNECT
 };
 class Time
 {
@@ -33,3 +34,5 @@ public:
         return ret;
     }
 };
+
+

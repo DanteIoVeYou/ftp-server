@@ -46,7 +46,20 @@ public:
         sockaddr_in peer;
         socklen_t len = sizeof(peer);
         bzero(&peer, len);
-        int ret = accept(fd, (sockaddr*)&peer, &len);
+        int ret = accept(fd, (sockaddr *)&peer, &len);
         return ret;
+    }
+    static void Connect(int fd, const std::string &ip, uint16_t port)
+    {
+        sockaddr_in peer;
+        bzero(&peer, sizeof(peer));
+        peer.sin_family = AF_INET;
+        peer.sin_port = htons(port);
+        peer.sin_addr.s_addr = inet_addr(ip.c_str());
+        if (connect(fd, (sockaddr *)&peer, sizeof(peer)) < 0)
+        {
+            LOG(FATAL, "connect server error");
+            exit(SOCK_CONNECT);
+        }
     }
 };
