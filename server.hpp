@@ -13,7 +13,7 @@ static const int BUFFER_SIZE = 1024;
  * Method: ls\r\n
  * \r\n
  * 2.
- * Method: getr\\n
+ * Method: get\r\n
  * Filename: xxx
  * \r\n
  * 3.
@@ -25,14 +25,14 @@ static const int BUFFER_SIZE = 1024;
 class Server
 {
 public:
-    Server(uint16_t port = 2222) : _port(port) {}
+    Server(uint16_t port = 8080) : _port(port) {}
     ~Server()
     {
         close(_listen_fd);
     }
     static void *handler_login(void *args)
     {
-        pthread_detach(pthread_self()); // 线程分离
+        LOG(DEBUG, "handler_login");
         int fd = *(int *)(args);
         while (true)
         {
@@ -47,6 +47,8 @@ public:
                 std::string method;
                 std::string cmd;
                 Utils::CutString(method_line, &method, &cmd, ":");
+                LOG(DEBUG, "method@" + method);
+                LOG(DEBUG, "cmd@" + cmd);
                 if (cmd == "ls")
                 {
                     Cmd_ls(fd);
@@ -112,7 +114,7 @@ public:
             Utils::CutString(line, &key, &value, ":");
             packet_map[key] = value;
         }
-        std::string filepath = ROOTDIR + packet_map["filename"];
+        std::string filepath = ROOTDIR + packet_map["Filename"];
         int localfile_fd = open(filepath.c_str(), O_CREAT | O_WRONLY);
         char buffer[BUFFER_SIZE] = {0};
         int size = 0;
@@ -139,7 +141,7 @@ public:
             Utils::CutString(line, &key, &value, ":");
             packet_map[key] = value;
         }
-        std::string filepath = ROOTDIR + packet_map["filename"];
+        std::string filepath = ROOTDIR + packet_map["Filename"];
         int localfile_fd = open(filepath.c_str(), O_RDONLY);
         struct stat st;
         fstat(localfile_fd, &st);
@@ -184,6 +186,8 @@ public:
     {
         pthread_t tid;
         pthread_create(&tid, nullptr, handler_login, (void *)&fd);
+        pthread_detach(tid);
+        LOG(INFO, "get a new link");
         // 登陆成功
     }
     void Loop()
@@ -198,7 +202,7 @@ public:
                 continue;
             }
             // 发送本服务器版本信息
-            SendLocalInfo(fd, SERVER_VERSION);
+            // SendLocalInfo(fd, SERVER_VERSION);
             // 等待对方发起用户名验证，查询用户名
             // RecvID();
             // 返回用户名的合法性

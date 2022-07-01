@@ -2,8 +2,9 @@
 
 int main()
 {
-    // Server *p = new Server;
-    // p->Init();
-    std::cout << "server" << std::endl;
+    Server *p = new Server;
+    p->Init();
+    p->Loop();
+    std::cout << "server start" << std::endl;
     return 0;
 }

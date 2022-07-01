@@ -7,18 +7,31 @@ public:
     static void Readline(int fd, std::string *line)
     {
         // Method: get\r\n
+        LOG(DEBUG, *line);
         char ch = 0;
-        while (ch != '\r')
+        while (true)
         {
             int s = recv(fd, &ch, 1, 0);
+            std::cout << "ch: " << ch << std::endl;
             if (s < 0)
             {
                 LOG(ERROR, "read line error");
                 return;
             }
-            (*line) += ch;
+            if (ch == '\r')
+            {
+                continue;
+            }
+            if (ch == '\n')
+            {
+                break;
+            }
+            else
+            {
+                (*line) += ch;
+            }
         }
-        (*line) += '\n';
+        LOG(DEBUG, ((*line) + " end").c_str());
     }
 
     static void CutString(const std::string &line, std::string *first_string, std::string *second_string, const std::string &sep)
