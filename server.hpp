@@ -3,12 +3,9 @@
 #include "utils.hpp"
 static const std::string SERVER_VERSION = "FTP-v0.1-copyright@abc-running on GNU Linux";
 static const std::string ROOTDIR = "./root/";
+static const std::string LF = "\r\n";
 static const int BUFFER_SIZE = 1024;
-// enum buffer
-// {
-//     BUFFER_SIZE = 1024
-// };
-/*
+/* 命令格式
  * 1.
  * Method: ls\r\n
  * \r\n
@@ -38,11 +35,17 @@ public:
         {
             std::string method_line;
             Utils::Readline(fd, &method_line);
+            std::cout << "ms: " << method_line.size() << std::endl;
             if (method_line.size() == 0)
             {
+                // 对端连接关闭
+                std::cout << "kkkkkk close" << std::endl;
+                break;
             }
             else
             {
+                // 去掉 \r\n
+                Utils::MoveLF(method_line, LF);
                 LOG(DEBUG, method_line);
                 std::string method;
                 std::string cmd;
@@ -77,18 +80,27 @@ public:
             }
         }
         close(fd);
+        LOG(INFO, "close");
     }
     static void Cmd_ls(int fd)
     {
-        std::string server_info;
+        std::string line;
+        Utils::Readline(fd, &line);
+
+        if (line == LF)
+        {
+            // 读到的只有\r\n，那么就说明当前的 ls 命令结束，socket已被读取完毕
+            std::cout << "ls: \\r\\n 读取完毕" << std::endl;
+        }
+        std::string files;
         std::filesystem::directory_iterator fns(ROOTDIR.c_str());
         for (const auto &fn : fns)
         {
             std::string filename(fn.path().c_str());
             // file_list.push_back(filename.substr(ROOTDIR.size()));
-            server_info += (filename.substr(ROOTDIR.size()) + "\r\n");
+            files += (filename.substr(ROOTDIR.size()) + LF);
         }
-        if (send(fd, server_info.c_str(), server_info.size(), 0) < 0)
+        if (send(fd, files.c_str(), files.size(), 0) < 0)
         {
             // Error
             return;
@@ -127,27 +139,28 @@ public:
     }
     static void Cmd_get(int fd)
     {
-        std::unordered_map<std::string, std::string> packet_map;
-        while (true)
-        {
-            std::string line;
-            Utils::Readline(fd, &line);
-            if (line == "\r\n")
-            {
-                break;
-            }
-            std::string key;
-            std::string value;
-            Utils::CutString(line, &key, &value, ":");
-            packet_map[key] = value;
-        }
-        std::string filepath = ROOTDIR + packet_map["Filename"];
+
+        std::string line;
+        Utils::Readline(fd, &line);
+        Utils::MoveLF(line, LF);
+        std::string key;
+        std::string value;
+        Utils::CutString(line, &key, &value, ":");
+        std::string &filename = value;
+        std::string filepath = ROOTDIR + filename;
+        LOG(DEBUG, filepath);
         int localfile_fd = open(filepath.c_str(), O_RDONLY);
         struct stat st;
         fstat(localfile_fd, &st);
-        if (sendfile(localfile_fd, fd, nullptr, st.st_size) < 0)
+        LOG(DEBUG, std::to_string(st.st_size));
+        if (sendfile(fd, localfile_fd, nullptr, st.st_size) < 0)
         {
             LOG(ERROR, "sendfile error");
+        }
+        Utils::Readline(fd, &line);
+        if (line == LF)
+        {
+            std::cout << "get: \\r\\n 读取完毕" << std::endl;
         }
         close(localfile_fd);
     }

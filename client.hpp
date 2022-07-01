@@ -23,8 +23,17 @@ public:
             // char buffer_cmd[1024];
             // ssize_t size = read(0, buffer_cmd, sizeof(buffer_cmd) - 1);
             std::string buffer_cmd;
-            std::cin >> buffer_cmd;
-            buffer_cmd += "\r\n";
+            while (true)
+            {
+                std::string line;
+                std::getline(std::cin, line);
+                line += "\r\n";
+                buffer_cmd += line;
+                if (line == "\r\n")
+                {
+                    break;
+                }
+            }
             int s = send(_fd, buffer_cmd.c_str(), buffer_cmd.size(), 0);
             LOG(INFO, "cmd send" + std::to_string(s));
             char buffer1[1024];
