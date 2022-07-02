@@ -55,4 +55,6 @@ public:
     {
         line = line.substr(0, line.size() - endstr.size());
     }
+
+
 };

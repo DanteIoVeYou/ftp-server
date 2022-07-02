@@ -22,6 +22,12 @@ enum Sock_Execpt
     SOCK_LISTEN,
     SOCK_CONNECT
 };
+static const std::string SERVER_VERSION = "FTP-v0.1-copyright@abc-running on GNU Linux";
+static const std::string ROOTDIR = "./root/";
+static const std::string LF = "\r\n";
+static const int BUFFER_SIZE = 1024;
+static const std::string client_cmd_prompt = "ftp:> ";
+
 class Time
 {
 public:

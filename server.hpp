@@ -1,10 +1,7 @@
 #pragma once
 #include "socket.hpp"
 #include "utils.hpp"
-static const std::string SERVER_VERSION = "FTP-v0.1-copyright@abc-running on GNU Linux";
-static const std::string ROOTDIR = "./root/";
-static const std::string LF = "\r\n";
-static const int BUFFER_SIZE = 1024;
+
 /* 命令格式
  * 1.
  * Method: ls\r\n
@@ -100,6 +97,7 @@ public:
             // file_list.push_back(filename.substr(ROOTDIR.size()));
             files += (filename.substr(ROOTDIR.size()) + LF);
         }
+        std::cout << "@@@" << files << "@@@" << std::endl;
         if (send(fd, files.c_str(), files.size(), 0) < 0)
         {
             // Error

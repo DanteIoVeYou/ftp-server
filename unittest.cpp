@@ -6,7 +6,7 @@ int main()
     std::string buffer_cmd;
     while (true)
     {
-        std::cout << "a>";
+        std::cout << "ftp>";
         fflush(stdout);
         std::string line;
         std::getline(std::cin, line);
