@@ -1,3 +1,10 @@
+/// project: ftp-server
+/// module: common
+/// filename: common.hpp
+/// Copyright (c) danteioveyou 2022. All rights reversed.
+/// Development time: from 2022.6.26
+/// Modify time: 2022.7.5
+
 #include <iostream>
 #include <filesystem>
 #include <string>

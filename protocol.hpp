@@ -170,13 +170,12 @@ public:
             buffer[ss] = 0;
         }
         std::cout << "@@@" << buffer << "@@@" << std::endl;
-
-        // while (ss = recv(_sock, buffer, sizeof(buffer) - 1, 0) > 0)
+        // while (ss = read(_sock, buffer, sizeof(buffer) - 1) > 0)
         // {
         //     buffer[ss] = 0;
         //     resp += buffer;
         // }
-        std::cout << resp << std::endl;
+        // std::cout << resp << std::endl;
     }
     void ParseResponse()
     {
